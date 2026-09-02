@@ -2,14 +2,16 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>Child Frame</title>
+  <title>اتاق بغلی</title>
   <style>
-    html, body { margin: 0; padding: 12px; background: #0e1626; color: #e8eef8; font-family: Vazirmatn, Tahoma, sans-serif; }
-    #board { min-height: 64px; border: 1px dashed #2a3b59; border-radius: 10px; padding: 10px; background: #121a2b; }
+    body { margin: 0; padding: 12px; font-family: Vazirmatn, Tahoma, sans-serif; background: #fffaf1; color: #2b241c; }
+    .tag { color: #6d6256; font-size: 12px; margin-bottom: 8px; }
+    #board { min-height: 70px; border: 1px dashed #e4d8c6; border-radius: 12px; padding: 10px; background: #fff; }
   </style>
 </head>
 <body>
-  <div id="board">هنوز پیامی نیامده</div>
+  <div class="tag">اتاق بغلی — هر نامه را روی میز می‌گذارد</div>
+  <div id="board">هنوز نامه‌ای نیامده</div>
   <script>
     window.addEventListener("message", function (event) {
       document.getElementById("board").innerHTML = event.data;

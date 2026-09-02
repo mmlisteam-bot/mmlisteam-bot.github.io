@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#0b1220"/>
+  <rect x="10" y="10" width="108" height="108" rx="22" fill="#121a2b" stroke="#f5a524" stroke-width="3"/>
+  <text x="64" y="76" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#f5a524">JS</text>
+  <circle cx="98" cy="30" r="8" fill="#3dd68c"/>
+</svg>

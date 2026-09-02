@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Child Frame</title>
+  <style>
+    html, body { margin: 0; padding: 12px; background: #0e1626; color: #e8eef8; font-family: Vazirmatn, Tahoma, sans-serif; }
+    #board { min-height: 64px; border: 1px dashed #2a3b59; border-radius: 10px; padding: 10px; background: #121a2b; }
+  </style>
+</head>
+<body>
+  <div id="board">هنوز پیامی نیامده</div>
+  <script>
+    window.addEventListener("message", function (event) {
+      document.getElementById("board").innerHTML = event.data;
+    });
+  </script>
+</body>
+</html>

@@ -3,40 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f4efe4" />
-  <title>اتاق‌های صفحه</title>
+  <meta name="theme-color" content="#fff4d6" />
+  <title>خانه چراغک</title>
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=kid2" />
 </head>
 <body>
   <div class="app">
     <header class="top">
       <div class="brand">
-        <div class="logo">0</div>
+        <div class="logo" aria-hidden="true">💡</div>
         <div>
-          <h1>اتاق‌های صفحه</h1>
+          <h1>خانه چراغک</h1>
           <p>از صفر، مثل کلاس اول</p>
         </div>
       </div>
-      <div class="progress-wrap">
-        <span id="prog-text">0 از 9</span>
-        <div class="bar"><i id="prog-bar"></i></div>
+      <div class="top-actions">
+        <button class="tiny" id="btn-words" type="button">واژه‌نامه</button>
+        <button class="tiny" id="btn-voice" type="button">صدا روشن</button>
       </div>
     </header>
-    <section id="home" class="screen active">
+    <div class="progress-wrap">
+      <span id="prog-text">۰ از ۹ اتاق</span>
+      <div class="bar"><i id="prog-bar"></i></div>
+    </div>
+    <section id="welcome" class="screen active">
+      <div class="hero teacher">
+        <div class="mascot" aria-hidden="true">💡</div>
+        <div class="bubble">
+          <p>سلام. من <b>چراغک</b> هستم.</p>
+          <p>اینجا یک خانه است. هر اتاق یک کار خیلی کوچک دارد. لازم نیست برنامه‌نویسی بلد باشی.</p>
+          <p>قانون خانه: اول ببین، بعد خودت بزن، بعد با زبان خودت بنویس. تا ننویسی، در بعدی بسته می‌ماند.</p>
+        </div>
+      </div>
+      <div class="rules">
+        <div class="rule"><span>۱</span>یک اتاق، یک کشف</div>
+        <div class="rule"><span>۲</span>چراغ روشن = پیدا کردی</div>
+        <div class="rule"><span>۳</span>دفترچه اجباری است</div>
+      </div>
+      <div class="row">
+        <button class="primary big" id="start-home" type="button">بریم داخل خانه‌ها</button>
+        <button class="ghost" id="read-welcome" type="button">برایم بخوان</button>
+      </div>
+    </section>
+    <section id="home" class="screen">
       <div class="hero">
-        <h2>یک اتاق، یک کشف</h2>
-        <p>لازم نیست برنامه‌نویسی بلد باشی. هر اتاق یک کار کوچک است. اول ببین، بعد عوض کن، آخر اسمش را یاد بگیر. تا دفترچه را ننویسی، در بعدی باز نمی‌شود.</p>
+        <h2>اتاق‌ها را یکی‌یکی باز کن</h2>
+        <p>اتاق قفل‌شده یعنی هنوز اتاق قبلی را تمام نکرده‌ای یا دفترچه‌اش خالی است.</p>
       </div>
       <div class="grid" id="level-list"></div>
-      <div class="row" style="margin-top:14px"><button id="reset">از اول</button></div>
+      <div class="row" style="margin-top:14px">
+        <button id="reset" type="button">از اول شروع کن</button>
+        <button class="ghost" id="back-welcome" type="button">حرف چراغک</button>
+      </div>
     </section>
     <section id="lesson" class="screen"></section>
   </div>
+  <aside id="dict" class="dict" hidden>
+    <div class="dict-head">
+      <b>واژه‌نامه دیوار</b>
+      <button class="tiny" id="close-dict" type="button">بستن</button>
+    </div>
+    <p class="muted">هر اتاق که تمام شود، یک کلمه روی دیوار می‌نشیند.</p>
+    <ul id="dict-list"></ul>
+  </aside>
   <div class="toast" id="toast"></div>
-  <script src="js/main.js?v=kid"></script>
+  <script src="js/main.js?v=kid2"></script>
 </body>
 </html>

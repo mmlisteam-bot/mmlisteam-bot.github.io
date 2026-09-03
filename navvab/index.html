@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NAVVAB.IR</title>
+  <title>NAVVAB.IR | یادنامه شهید نواب صفوی</title>
+  <meta name="description" content="یادنامه شهید سید مجتبی نواب صفوی؛ زندگینامه، خط‌زمان، فدائیان اسلام و سخنان." />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
@@ -34,17 +36,15 @@
   </header>
   <main>
     <section id="page-home" class="page on">
-      <div class="hero">
-        <div class="hero-inner">
-          <img id="portrait" class="portrait" alt="پرتره" src="https://commons.wikimedia.org/wiki/Special:FilePath/Navvad_Safavi.jpg" />
-          <div>
-            <div class="kicker" id="heroKicker">شهید · طلبه · بنیان‌گذار فدائیان اسلام</div>
-            <h1 id="heroTitle">سید مجتبی نواب صفوی</h1>
-            <p class="lead" id="heroLead"></p>
-            <div class="meta-row" id="heroChips"></div>
-          </div>
+      <div class="hero"><div class="hero-inner">
+        <img id="portrait" class="portrait" alt="پرتره" src="https://commons.wikimedia.org/wiki/Special:FilePath/Navvad_Safavi.jpg" />
+        <div>
+          <div class="kicker" id="heroKicker"></div>
+          <h1 id="heroTitle"></h1>
+          <p class="lead" id="heroLead"></p>
+          <div class="meta-row" id="heroChips"></div>
         </div>
-      </div>
+      </div></div>
       <div class="wrap">
         <h2>بخش‌های پایگاه</h2>
         <div class="gold-rule"></div>
@@ -53,87 +53,42 @@
           <a class="link-card" href="#/timeline"><h3>خط‌زمان</h3><p>از خانی‌آباد تا ۲۷ دی ۱۳۳۴.</p></a>
           <a class="link-card" href="#/fadaiyan"><h3>فدائیان اسلام</h3><p>تشکیلات، بیانیه و راهنمای حقایق.</p></a>
           <a class="link-card" href="#/quotes"><h3>سخنان</h3><p>نقل‌قول‌ها و خاطره دیدار مشهد.</p></a>
+          <a class="link-card" href="#/yar"><h3>یاران</h3><p>هم‌قطاران تیرباران‌شده در ۲۷ دی ۱۳۳۴.</p></a>
         </div>
       </div>
     </section>
-    <section id="page-bio" class="page">
-      <div class="wrap">
-        <div class="crumb"><a href="#/">خانه</a> / زندگینامه</div>
-        <h2>زندگینامه</h2>
-        <div class="gold-rule"></div>
-        <div class="grid-2">
-          <div id="bioText"></div>
-          <aside class="card"><dl class="facts" id="bioFacts"></dl></aside>
-        </div>
-      </div>
-    </section>
-    <section id="page-timeline" class="page">
-      <div class="wrap">
-        <div class="crumb"><a href="#/">خانه</a> / خط‌زمان</div>
-        <h2>خط‌زمان</h2>
-        <div class="gold-rule"></div>
-        <div class="timeline" id="timelineBox"></div>
-      </div>
-    </section>
-    <section id="page-fadaiyan" class="page">
-      <div class="wrap">
-        <div class="crumb"><a href="#/">خانه</a> / فدائیان اسلام</div>
-        <h2>فدائیان اسلام</h2>
-        <div class="gold-rule"></div>
-        <div class="card" id="fadaiyanText"></div>
-      </div>
-    </section>
-    <section id="page-quotes" class="page">
-      <div class="wrap">
-        <div class="crumb"><a href="#/">خانه</a> / سخنان</div>
-        <h2>سخنان</h2>
-        <div class="gold-rule"></div>
-        <div id="quotesBox"></div>
-      </div>
-    </section>
-    <section id="page-yar" class="page">
-      <div class="wrap">
-        <div class="crumb"><a href="#/">خانه</a> / یاران</div>
-        <h2>یاران هم‌قطار</h2>
-        <div class="gold-rule"></div>
-        <div class="companions" id="yarBox"></div>
-      </div>
-    </section>
+    <section id="page-bio" class="page"><div class="wrap"><div class="crumb"><a href="#/">خانه</a> / زندگینامه</div><h2>زندگینامه</h2><div class="gold-rule"></div><div class="grid-2"><div id="bioText"></div><aside class="card"><dl class="facts" id="bioFacts"></dl></aside></div></div></section>
+    <section id="page-timeline" class="page"><div class="wrap"><div class="crumb"><a href="#/">خانه</a> / خط‌زمان</div><h2>خط‌زمان</h2><div class="gold-rule"></div><div class="timeline" id="timelineBox"></div></div></section>
+    <section id="page-fadaiyan" class="page"><div class="wrap"><div class="crumb"><a href="#/">خانه</a> / فدائیان اسلام</div><h2>فدائیان اسلام</h2><div class="gold-rule"></div><div class="card" id="fadaiyanText"></div></div></section>
+    <section id="page-quotes" class="page"><div class="wrap"><div class="crumb"><a href="#/">خانه</a> / سخنان</div><h2>سخنان</h2><div class="gold-rule"></div><div id="quotesBox"></div></div></section>
+    <section id="page-yar" class="page"><div class="wrap"><div class="crumb"><a href="#/">خانه</a> / یاران</div><h2>یاران هم‌قطار</h2><div class="gold-rule"></div><div class="companions" id="yarBox"></div></div></section>
   </main>
-  <footer>
-    <div class="foot">
-      <div><strong style="color:#e8d5a3" id="footBrand">NAVVAB.IR</strong><p id="footNote">یادنامه غیررسمی</p></div>
-      <div id="footSrc">منابع عمومی: ویکی‌پدیا، ویکی‌شیعه، ایرنا.</div>
-    </div>
-  </footer>
+  <footer><div class="foot"><div><strong style="color:#e8d5a3" id="footBrand">NAVVAB.IR</strong><p id="footNote"></p></div><div id="footSrc"></div></div></footer>
   <button class="admin-fab" id="adminFab" type="button">پنل ادمین</button>
-  <div class="overlay" id="overlay">
-    <aside class="panel">
-      <button class="close-x" id="closeAdmin" type="button">×</button>
-      <h3>پنل مدیریت سایت</h3>
-      <div id="loginBox" class="login-box">
-        <label class="f">رمز ورود</label>
-        <input id="passInput" type="password" placeholder="رمز پیش‌فرض: navvab" />
-        <div class="actions"><button type="button" id="loginBtn">ورود</button></div>
-        <p class="hint">رمز فقط روی همین مرورگر ذخیره می‌شود. پیش‌فرض: navvab</p>
+  <div class="overlay" id="overlay"><aside class="panel">
+    <button class="close-x" id="closeAdmin" type="button">×</button>
+    <h3>پنل مدیریت سایت</h3>
+    <div id="loginBox" class="login-box">
+      <label class="f">رمز ورود</label>
+      <input id="passInput" type="password" placeholder="navvab" />
+      <div class="actions"><button type="button" id="loginBtn">ورود</button></div>
+    </div>
+    <div id="adminBox" style="display:none">
+      <div class="tabs" id="adminTabs"></div>
+      <div id="adminBody"></div>
+      <div class="actions">
+        <button type="button" id="saveBtn">ذخیره و اعمال</button>
+        <button type="button" id="exportBtn">دانلود JSON</button>
+        <button type="button" id="hostBtn">دانلود نسخه نهایی برای هاست</button>
+        <button type="button" id="resetBtn">بازگشت به پیش‌فرض</button>
       </div>
-      <div id="adminBox" style="display:none">
-        <div class="tabs" id="adminTabs"></div>
-        <div id="adminBody"></div>
-        <div class="actions">
-          <button type="button" id="saveBtn">ذخیره و اعمال</button>
-          <button type="button" id="exportBtn">دانلود JSON</button>
-          <button type="button" id="resetBtn">بازگشت به پیش‌فرض</button>
-        </div>
-        <label class="f">ورود JSON</label>
-        <input type="file" id="importFile" accept="application/json" />
-        <label class="f">تغییر رمز ادمین</label>
-        <input id="newPass" type="text" placeholder="رمز جدید" />
-        <div class="actions"><button type="button" id="setPassBtn">ثبت رمز</button></div>
-        <p class="hint">تغییرها روی همین دستگاه می‌ماند تا JSON را خروجی بگیری.</p>
-      </div>
-    </aside>
-  </div>
+      <label class="f">ورود JSON</label>
+      <input type="file" id="importFile" accept="application/json" />
+      <label class="f">تغییر رمز</label>
+      <input id="newPass" type="text" />
+      <div class="actions"><button type="button" id="setPassBtn">ثبت رمز</button></div>
+    </div>
+  </aside></div>
+<script src="./defaults.baked.js"></script>
 <script src="./app.js"></script>
-</body>
-</html>
+</body></html>

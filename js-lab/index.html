@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b0d10" />
-  <title>Client-Side JS Security Lab</title>
+  <title>لاب امنیت جاوااسکریپت سمت کلاینت</title>
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=lab4" />
+  <link rel="stylesheet" href="css/style.css?v=lab5" />
 </head>
 <body>
   <div class="app">
@@ -18,13 +18,13 @@
       <div class="brand">
         <div class="logo">{ }</div>
         <div>
-          <h1>Client-Side JS Security Lab</h1>
+          <h1>لاب امنیت جاوااسکریپت سمت کلاینت</h1>
           <p>Source → Sink · DOM XSS · SOP · CORS · postMessage · CSRF · PP</p>
         </div>
       </div>
       <div class="meta">
         <span id="prog-text">۰ / ۱۰</span>
-        <button class="ghost" id="reset" type="button">reset progress</button>
+        <button class="ghost" id="reset" type="button">پاک کردن پیشرفت</button>
       </div>
     </header>
     <div class="bar"><i id="prog-bar"></i></div>
@@ -33,10 +33,10 @@
         <h2>لاب pentest سمت کلاینت</h2>
         <p>
           هر ماژول با API واقعی مرورگر کار می‌کند:
-          <code>document</code>, <code>location</code>, <code>innerHTML</code>,
-          <code>XMLHttpRequest</code>, <code>fetch</code>,
-          <code>Access-Control-Allow-Origin</code>,
-          <code>window.postMessage</code>, <code>Object.prototype</code>.
+          <code>document</code>، <code>location</code>، <code>innerHTML</code>،
+          <code>XMLHttpRequest</code>، <code>fetch</code>،
+          <code>Access-Control-Allow-Origin</code>،
+          <code>window.postMessage</code>، <code>Object.prototype</code>.
           هدف: تشخیص Source، انتخاب Sink، ساخت payload برای context مشخص.
         </p>
       </div>
@@ -45,6 +45,6 @@
     <section id="lesson" class="screen"></section>
   </div>
   <div class="toast" id="toast"></div>
-  <script src="js/main.js?v=lab4"></script>
+  <script src="js/main.js?v=lab5"></script>
 </body>
 </html>

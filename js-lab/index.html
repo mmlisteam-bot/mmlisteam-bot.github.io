@@ -2,76 +2,49 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#fff4d6" />
-  <title>خانه چراغک</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0d10" />
+  <title>Client-Side JS Security Lab</title>
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=kid2" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=lab4" />
 </head>
 <body>
   <div class="app">
     <header class="top">
       <div class="brand">
-        <div class="logo" aria-hidden="true">💡</div>
+        <div class="logo">{ }</div>
         <div>
-          <h1>خانه چراغک</h1>
-          <p>از صفر، مثل کلاس اول</p>
+          <h1>Client-Side JS Security Lab</h1>
+          <p>Source → Sink · DOM XSS · SOP · CORS · postMessage · CSRF · PP</p>
         </div>
       </div>
-      <div class="top-actions">
-        <button class="tiny" id="btn-words" type="button">واژه‌نامه</button>
-        <button class="tiny" id="btn-voice" type="button">صدا روشن</button>
+      <div class="meta">
+        <span id="prog-text">۰ / ۱۰</span>
+        <button class="ghost" id="reset" type="button">reset progress</button>
       </div>
     </header>
-    <div class="progress-wrap">
-      <span id="prog-text">۰ از ۹ اتاق</span>
-      <div class="bar"><i id="prog-bar"></i></div>
-    </div>
-    <section id="welcome" class="screen active">
-      <div class="hero teacher">
-        <div class="mascot" aria-hidden="true">💡</div>
-        <div class="bubble">
-          <p>سلام. من <b>چراغک</b> هستم.</p>
-          <p>اینجا یک خانه است. هر اتاق یک کار خیلی کوچک دارد. لازم نیست برنامه‌نویسی بلد باشی.</p>
-          <p>قانون خانه: اول ببین، بعد خودت بزن، بعد با زبان خودت بنویس. تا ننویسی، در بعدی بسته می‌ماند.</p>
-        </div>
+    <div class="bar"><i id="prog-bar"></i></div>
+    <section id="home" class="screen active">
+      <div class="intro">
+        <h2>لاب pentest سمت کلاینت</h2>
+        <p>
+          هر ماژول با API واقعی مرورگر کار می‌کند:
+          <code>document</code>, <code>location</code>, <code>innerHTML</code>,
+          <code>XMLHttpRequest</code>, <code>fetch</code>,
+          <code>Access-Control-Allow-Origin</code>,
+          <code>window.postMessage</code>, <code>Object.prototype</code>.
+          هدف: تشخیص Source، انتخاب Sink، ساخت payload برای context مشخص.
+        </p>
       </div>
-      <div class="rules">
-        <div class="rule"><span>۱</span>یک اتاق، یک کشف</div>
-        <div class="rule"><span>۲</span>چراغ روشن = پیدا کردی</div>
-        <div class="rule"><span>۳</span>دفترچه اجباری است</div>
-      </div>
-      <div class="row">
-        <button class="primary big" id="start-home" type="button">بریم داخل خانه‌ها</button>
-        <button class="ghost" id="read-welcome" type="button">برایم بخوان</button>
-      </div>
-    </section>
-    <section id="home" class="screen">
-      <div class="hero">
-        <h2>اتاق‌ها را یکی‌یکی باز کن</h2>
-        <p>اتاق قفل‌شده یعنی هنوز اتاق قبلی را تمام نکرده‌ای یا دفترچه‌اش خالی است.</p>
-      </div>
-      <div class="grid" id="level-list"></div>
-      <div class="row" style="margin-top:14px">
-        <button id="reset" type="button">از اول شروع کن</button>
-        <button class="ghost" id="back-welcome" type="button">حرف چراغک</button>
-      </div>
+      <div class="grid" id="mod-list"></div>
     </section>
     <section id="lesson" class="screen"></section>
   </div>
-  <aside id="dict" class="dict" hidden>
-    <div class="dict-head">
-      <b>واژه‌نامه دیوار</b>
-      <button class="tiny" id="close-dict" type="button">بستن</button>
-    </div>
-    <p class="muted">هر اتاق که تمام شود، یک کلمه روی دیوار می‌نشیند.</p>
-    <ul id="dict-list"></ul>
-  </aside>
   <div class="toast" id="toast"></div>
-  <script src="js/main.js?v=kid2"></script>
+  <script src="js/main.js?v=lab4"></script>
 </body>
 </html>

@@ -1,11 +1,8 @@
 {
-  "name": "خانه چراغک",
-  "short_name": "چراغک",
-  "start_url": "./index.html",
+  "name": "Client-Side JS Lab",
+  "short_name": "JS Lab",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#fff4d6",
-  "theme_color": "#fff4d6",
-  "lang": "fa",
-  "dir": "rtl",
-  "icons": [{"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10"
 }

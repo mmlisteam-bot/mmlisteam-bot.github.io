@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>اتاق بغلی</title>
+  <meta charset="UTF-8">
+  <title>child frame — postMessage sink</title>
   <style>
-    body { margin: 0; padding: 12px; font-family: Vazirmatn, Tahoma, sans-serif; background: #fffdf7; color: #2a2118; }
-    .tag { color: #6d6256; font-size: 13px; margin-bottom: 8px; }
-    #board { min-height: 70px; border: 1px dashed #ead9b6; border-radius: 12px; padding: 10px; background: #fff; }
+    body{font:13px/1.45 ui-monospace,monospace;margin:10px;background:#111;color:#ddd}
+    #box{padding:8px;border:1px dashed #555;min-height:52px;background:#1a1a1a}
+    .meta{color:#888;font-size:11px;margin-top:6px}
   </style>
 </head>
 <body>
-  <div class="tag">اتاق بغلی — هر نامه را همان‌طور که هست روی میز می‌گذارد</div>
-  <div id="board">هنوز نامه‌ای نیامده</div>
+  <div>child origin: <span id="me"></span></div>
+  <div id="box">waiting for message…</div>
+  <div class="meta" id="meta"></div>
   <script>
+    document.getElementById("me").textContent = location.origin;
     window.addEventListener("message", function (event) {
-      document.getElementById("board").innerHTML = event.data;
+      document.getElementById("meta").textContent =
+        "event.origin=" + event.origin + "  event.source=" + (event.source === window.parent ? "parent" : "?");
+      document.getElementById("box").innerHTML = String(event.data);
     });
   </script>
 </body>
